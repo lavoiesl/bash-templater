@@ -2,7 +2,7 @@
 # Replaces all {{VAR}} by the $VAR value in a template file and outputs it
 
 if [[ ! -f "$1" ]]; then
-    echo "Usage: $0 template" >&2
+    echo "Usage: VAR=value $0 template" >&2
     exit 1
 fi
 
