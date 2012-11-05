@@ -1,5 +1,6 @@
 #!/bin/bash
 # Replaces all {{VAR}} by the $VAR value in a template file and outputs it
+# Use with -h to output all variables
 
 if [[ ! -f "$1" ]]; then
     echo "Usage: VAR=value $0 template" >&2
@@ -34,7 +35,19 @@ for default in $defaults; do
 
     # remove define line
     replaces="-e '/^{{$var=/d' $replaces"
+    vars="$vars
+$current"
 done
+
+vars=$(echo $vars | sort | uniq)
+
+if [[ "$2" = "-h" ]]; then
+    for var in $vars; do
+        value=`var_value $var`
+        echo "$var = $value"
+    done
+    exit 0
+fi
 
 # Replace all {{VAR}} by $VAR value
 for var in $vars; do
