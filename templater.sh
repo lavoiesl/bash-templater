@@ -1,18 +1,92 @@
 #!/bin/bash
 # Replaces all {{VAR}} by the $VAR value in a template file and outputs it
-# Use with -h to output all variables
 
-if [[ ! -f "$1" ]]; then
-    echo "Usage: VAR=value $0 template" >&2
+readonly PROGNAME=$(basename $0)
+
+template_file="${1}"
+config_file="<none>"
+print_only="false"
+silent="false"
+
+usage="${PROGNAME} [-h] [-d] [-f] [-s] -- 
+
+where:
+    -h, --help
+        Show this help text
+    -p, --print
+        Don't do anything, just print the result of the variable expansion(s)
+    -f, --file
+        Specify a file to read variables from
+    -s, --silent
+        Don't print warning messages (for example if no variables are found)
+
+examples:
+    VAR1=Something VAR2=1.2.3 ${PROGNAME} test.txt 
+    ${PROGNAME} test.txt -f my-variables.txt
+    ${PROGNAME} test.txt -f my-variables.txt > new-test.txt"
+
+if [ $# -eq 0 ]; then
+  echo "$usage"
+  exit 1    
+fi
+
+if [[ ! -f "${1}" ]]; then
+    echo "You need to specify a template file" >&2
+    echo "$usage"
     exit 1
 fi
 
-template="$1"
+template="${1}"
+
+if [ "$#" -ne 0 ]; then
+    while [ "$#" -gt 0 ]
+    do
+        case "$1" in
+        -h|--help)
+            echo "$usage"
+            exit 0
+            ;;        
+        -p|--print)
+            print_only="true"
+            ;;
+        -f|--file)
+            config_file="$2"
+            ;;
+        -s|--silent)
+            silent="true"
+            ;;
+        --)
+            break
+            ;;
+        -*)
+            echo "Invalid option '$1'. Use --help to see the valid options" >&2
+            exit 1
+            ;;
+        # an option argument, continue
+        *)  ;;
+        esac
+        shift
+    done
+fi
+
 vars=$(grep -oE '\{\{[A-Za-z0-9_]+\}\}' "$template" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
 
 if [[ -z "$vars" ]]; then
-    echo "Warning: No variable was found in $template, syntax is {{VAR}}" >&2
+    if [ "$silent" == "false" ]; then
+        echo "Warning: No variable was found in $template, syntax is {{VAR}}" >&2
+    fi
 fi
+
+# Load variables from file if needed
+if [ "${config_file}" != "<none>" ]; then
+    if [[ ! -f "${config_file}" ]]; then
+      echo "The file ${config_file} does not exists" >&2
+      echo "$usage"      
+      exit 1
+    fi
+
+    source "${config_file}"
+fi    
 
 var_value() {
     eval echo \$$1
@@ -41,7 +115,7 @@ done
 
 vars=$(echo $vars | sort | uniq)
 
-if [[ "$2" = "-h" ]]; then
+if [[ "$print_only" == "true" ]]; then
     for var in $vars; do
         value=`var_value $var`
         echo "$var = $value"
@@ -53,7 +127,9 @@ fi
 for var in $vars; do
     value=`var_value $var`
     if [[ -z "$value" ]]; then
-        echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
+        if [ $silent == "false" ]; then    
+            echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
+        fi
     fi
 
     # Escape slashes
