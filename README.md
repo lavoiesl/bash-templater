@@ -8,7 +8,7 @@ Sébastien Lavoie <github@lavoie.sl>
 
 Johan Haleby
 
-See http://blog.lavoie.sl/2012/11/simple-templating-system-using-bash.html for other details
+See http://code.haleby.se/2015/11/20/simple-templating-engine-in-bash/  and http://blog.lavoie.sl/2012/11/simple-templating-system-using-bash.html for more details
 
 ## Usage
 	
