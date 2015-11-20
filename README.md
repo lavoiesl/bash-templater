@@ -19,13 +19,13 @@ VAR=value templater.sh template
 Read variables from file:
     
 ```bash
-template.sh template -f variables.txt
+templater.sh template -f variables.txt
 ```
 
 Don't print any warning messages:
 
 ```bash
-template.sh template -f variables.txt -s
+templater.sh template -f variables.txt -s
 ```
 
 ## Examples
