@@ -3,7 +3,6 @@
 
 readonly PROGNAME=$(basename $0)
 
-template_file="${1}"
 config_file="<none>"
 print_only="false"
 silent="false"
@@ -69,11 +68,11 @@ if [ "$#" -ne 0 ]; then
     done
 fi
 
-vars=$(grep -oE '\{\{[A-Za-z0-9_]+\}\}' "$template" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
+vars=$(grep -oE '\{\{[A-Za-z0-9_]+\}\}' "${template}" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
 
 if [[ -z "$vars" ]]; then
     if [ "$silent" == "false" ]; then
-        echo "Warning: No variable was found in $template, syntax is {{VAR}}" >&2
+        echo "Warning: No variable was found in ${template}, syntax is {{VAR}}" >&2
     fi
 fi
 
@@ -97,7 +96,8 @@ replaces=""
 # Reads default values defined as {{VAR=value}} and delete those lines
 # There are evaluated, so you can do {{PATH=$HOME}} or {{PATH=`pwd`}}
 # You can even reference variables defined in the template before
-defaults=$(grep -oE '^\{\{[A-Za-z0-9_]+=.+\}\}' "$template" | sed -e 's/^{{//' -e 's/}}$//')
+defaults=$(grep -oE '^\{\{[A-Za-z0-9_]+=.+\}\}' "${template}" | sed -e 's/^{{//' -e 's/}}$//')
+
 for default in $defaults; do
     var=$(echo "$default" | grep -oE "^[A-Za-z0-9_]+")
     current=`var_value $var`
@@ -137,4 +137,5 @@ for var in $vars; do
     replaces="-e 's/{{$var}}/$value/g' $replaces"
 done
 
-eval sed $replaces "$template"
+escaped_template_path=$(echo $template | sed 's/ /\\ /g')
+eval sed $replaces "$escaped_template_path"
