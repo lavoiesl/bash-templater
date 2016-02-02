@@ -84,9 +84,9 @@ if [ "${config_file}" != "<none>" ]; then
       exit 1
     fi
 
-    # Create temp file
+    # Create temp file where & and "space" is escaped
     tmpfile=`mktemp`   
-    sed -e "s;\&;\\\&;g" ${config_file} > $tmpfile    
+    sed -e "s;\&;\\\&;g" -e "s;\ ;\\\ ;g" ${config_file} > $tmpfile
     source $tmpfile
 fi    
 
@@ -137,7 +137,7 @@ for var in $vars; do
 
     # Escape slashes
     value=$(echo "$value" | sed 's/\//\\\//g');
-    replaces="-e 's/{{$var}}/$value/g' $replaces"
+    replaces="-e 's;{{$var}};${value};g' $replaces"    
 done
 
 escaped_template_path=$(echo $template | sed 's/ /\\ /g')
