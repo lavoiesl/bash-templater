@@ -86,7 +86,7 @@ if [ "${config_file}" != "<none>" ]; then
 
     # Create temp file where & and "space" is escaped
     tmpfile=`mktemp`   
-    sed -e "s;\&;\\\&;g" -e "s;\ ;\\\ ;g" ${config_file} > $tmpfile
+    sed -e "s;\&;\\\&;g" -e "s;\ ;\\\ ;g" "${config_file}" > $tmpfile
     source $tmpfile
 fi    
 
@@ -130,14 +130,14 @@ fi
 for var in $vars; do
     value=`var_value $var`
     if [[ -z "$value" ]]; then
-        if [ $silent == "false" ]; then    
+        if [ $silent == "false" ]; then
             echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
         fi
     fi
 
     # Escape slashes
     value=$(echo "$value" | sed 's/\//\\\//g');
-    replaces="-e 's;{{$var}};${value};g' $replaces"    
+    replaces="-e 's/{{$var}}/${value}/g' $replaces"    
 done
 
 escaped_template_path=$(echo $template | sed 's/ /\\ /g')
