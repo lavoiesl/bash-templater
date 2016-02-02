@@ -84,7 +84,10 @@ if [ "${config_file}" != "<none>" ]; then
       exit 1
     fi
 
-    source "${config_file}"
+    # Create temp file
+    tmpfile=`mktemp`   
+    sed -e "s;\&;\\\&;g" ${config_file} > $tmpfile    
+    source $tmpfile
 fi    
 
 var_value() {
