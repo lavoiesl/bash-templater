@@ -25,7 +25,9 @@
 # SOFTWARE.
 #
 # See: https://github.com/johanhaleby/bash-templater
-# Version: https://github.com/johanhaleby/bash-templater/commit/5ac655d554238ac70b08ee4361d699ea9954c941# Replaces all {{VAR}} by the $VAR value in a template file and outputs it
+# Version: https://github.com/johanhaleby/bash-templater/commit/5ac655d554238ac70b08ee4361d699ea9954c941
+
+# Replaces all {{VAR}} by the $VAR value in a template file and outputs it
 
 readonly PROGNAME=$(basename $0)
 
