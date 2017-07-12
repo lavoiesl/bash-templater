@@ -22,6 +22,15 @@ Read variables from file:
 templater.sh template -f variables.txt
 ```
 
+e.g.:
+```bash
+# variables.txt
+# The author
+AUTHOR=Johan
+# The version
+VERSION=1.2.3
+```
+
 Don't print any warning messages:
 
 ```bash
