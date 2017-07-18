@@ -18,47 +18,79 @@ var_value() {
     eval echo \$$1
 }
 
-replaces=""
+##
+# Escape custom characters in a string
+# WARNING: if \ is escaped, it must be the first
+# Example: escape "ab'\c" '\' "'"   ===>  ab\'\\c
+#
+function escape_chars() {
+    local content="${1}"
+    shift
+
+    for char in "$@"; do
+        if [ "${char}" = '$' -o "${char}" = '\' -o "${char}" = '/' ]; then
+            char="\\${char}"
+        fi
+        content="$(echo "${content}" | sed -e "s/${char}/\\\\${char}/g")"
+    done
+
+    echo "${content}"
+}
+
+function echo_var() {
+    local var="${1}"
+    local content="${2}"
+    local escaped="$(escape_chars "${content}" '\' '"')"
+
+    echo "${var}=\"${escaped}\""
+}
+
+declare -a replaces
+replaces=()
 
 # Reads default values defined as {{VAR=value}} and delete those lines
 # There are evaluated, so you can do {{PATH=$HOME}} or {{PATH=`pwd`}}
 # You can even reference variables defined in the template before
-defaults=$(grep -oE '^\{\{[A-Za-z0-9_]+=.+\}\}' "$template" | sed -e 's/^{{//' -e 's/}}$//')
+defaults=$(grep -oE '^\{\{[A-Za-z0-9_]+=.+\}\}$' "${template}" | sed -e 's/^{{//' -e 's/}}$//')
+IFS=$'\n'
 for default in $defaults; do
-    var=$(echo "$default" | grep -oE "^[A-Za-z0-9_]+")
-    current=`var_value $var`
+    var=$(echo "${default}" | grep -oE "^[A-Za-z0-9_]+")
+    current="$(var_value "${var}")"
 
     # Replace only if var is not set
-    if [[ -z "$current" ]]; then
-        eval $default
+    if [[ -n "$current" ]]; then
+        eval "$(echo_var "${var}" "${current}")"
+    else
+        eval "${default}"
     fi
 
     # remove define line
-    replaces="-e '/^{{$var=/d' $replaces"
-    vars="$vars
-$current"
+    replaces+=("-e")
+    replaces+=("/^{{${var}=/d")
+    vars="${vars} ${var}"
 done
 
-vars=$(echo $vars | sort | uniq)
+vars=$(echo $vars | tr " " "\n" | sort | uniq)
 
 if [[ "$2" = "-h" ]]; then
     for var in $vars; do
-        value=`var_value $var`
-        echo "$var = $value"
+        value="$(var_value "${var}")"
+        echo_var "${var}" "${value}"
     done
     exit 0
 fi
 
 # Replace all {{VAR}} by $VAR value
 for var in $vars; do
-    value=`var_value $var`
+    value="$(var_value $var)"
     if [[ -z "$value" ]]; then
         echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
     fi
 
     # Escape slashes
-    value=$(echo "$value" | sed 's/\//\\\//g');
-    replaces="-e 's/{{$var}}/$value/g' $replaces"
+    value="$(escape_chars "${value}" '\' '/' ' ')";
+    replaces+=("-e")
+    replaces+=("s/{{${var}}}/${value}/g")
 done
 
-eval sed $replaces "$template"
+sed "${replaces[@]}" "${template}"
