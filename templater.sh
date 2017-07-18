@@ -15,12 +15,12 @@ if [[ -z "$vars" ]]; then
 fi
 
 var_value() {
-    eval echo \$$1
+    var="${1}"
+    eval echo \$"${var}"
 }
 
 ##
 # Escape custom characters in a string
-# WARNING: if \ is escaped, it must be the first
 # Example: escape "ab'\c" '\' "'"   ===>  ab\'\\c
 #
 function escape_chars() {
@@ -28,10 +28,7 @@ function escape_chars() {
     shift
 
     for char in "$@"; do
-        if [ "${char}" = '$' -o "${char}" = '\' -o "${char}" = '/' ]; then
-            char="\\${char}"
-        fi
-        content="$(echo "${content}" | sed -e "s/${char}/\\\\${char}/g")"
+        content="${content//${char}/\\${char}}"
     done
 
     echo "${content}"
@@ -40,7 +37,7 @@ function escape_chars() {
 function echo_var() {
     local var="${1}"
     local content="${2}"
-    local escaped="$(escape_chars "${content}" '\' '"')"
+    local escaped="$(escape_chars "${content}" "\\" '"')"
 
     echo "${var}=\"${escaped}\""
 }
@@ -70,7 +67,7 @@ for default in $defaults; do
     vars="${vars} ${var}"
 done
 
-vars=$(echo $vars | tr " " "\n" | sort | uniq)
+vars="$(echo "${vars}" | tr " " "\n" | sort | uniq)"
 
 if [[ "$2" = "-h" ]]; then
     for var in $vars; do
@@ -82,13 +79,13 @@ fi
 
 # Replace all {{VAR}} by $VAR value
 for var in $vars; do
-    value="$(var_value $var)"
+    value="$(var_value "${var}")"
     if [[ -z "$value" ]]; then
         echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
     fi
 
     # Escape slashes
-    value="$(escape_chars "${value}" '\' '/' ' ')";
+    value="$(escape_chars "${value}" "\\" '/' ' ')";
     replaces+=("-e")
     replaces+=("s/{{${var}}}/${value}/g")
 done
