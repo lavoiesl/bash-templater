@@ -10,7 +10,18 @@ See http://blog.lavoie.sl/2012/11/simple-templating-system-using-bash.html for o
 
 ## Usage
 
-    VAR=value templater.sh template
+```sh
+# Passing arguments directly
+VAR=value templater.sh template
+
+# Evaluate /tmp/foo and pass those variables to the template
+# Useful for defining variables in a file
+# Parentheses are important for not polluting the current shell
+(set -a && . /tmp/foo && templater.sh template)
+
+# A variant that does NOT pass current env variables to the templater
+sh -c "set -a && . /tmp/foo && templater.sh template"
+```
 
 ## Examples
 See examples/
