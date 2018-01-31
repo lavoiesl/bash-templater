@@ -8,7 +8,7 @@ if [[ ! -f "$1" ]]; then
 fi
 
 template="$1"
-vars=$(grep -oE '\{\{[A-Za-z0-9_]+\}\}' "$template" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
+vars=$(grep -oE '\{\{\s*[A-Za-z0-9_]+\s*\}\}' "$template" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
 
 if [[ -z "$vars" ]]; then
     echo "Warning: No variable was found in $template, syntax is {{VAR}}" >&2
@@ -87,7 +87,7 @@ for var in $vars; do
     # Escape slashes
     value="$(escape_chars "${value}" "\\" '/' ' ')";
     replaces+=("-e")
-    replaces+=("s/{{${var}}}/${value}/g")
+    replaces+=("s/{{\s*${var}\s*}}/${value}/g")
 done
 
 sed "${replaces[@]}" "${template}"
