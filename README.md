@@ -1,6 +1,9 @@
 # BASH Templater
+
 Very simple templating system that replace {{VAR}} by $VAR environment value
 Supports default values by writting {{VAR=value}} in the template
+
+[![Build Status](https://travis-ci.org/lavoiesl/bash-templater.svg?branch=master)](https://travis-ci.org/lavoiesl/bash-templater)
 
 ## Author
 
