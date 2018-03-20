@@ -112,10 +112,7 @@ if [ "${config_file}" != "<none>" ]; then
       exit 1
     fi
 
-    # Create temp file where & and "space" is escaped
-    tmpfile=`mktemp`   
-    sed -e "s;\&;\\\&;g" -e "s;\ ;\\\ ;g" "${config_file}" > $tmpfile
-    source $tmpfile
+    source "${config_file}"
 fi    
 
 var_value() {
@@ -156,7 +153,7 @@ fi
 
 # Replace all {{VAR}} by $VAR value
 for var in $vars; do
-    value=`var_value $var`
+    value=$(var_value $var | sed -e "s;\&;\\\&;g" -e "s;\ ;\\\ ;g") # '&' and <space> is escaped 
     if [[ -z "$value" ]]; then
         if [ $silent == "false" ]; then
             echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
