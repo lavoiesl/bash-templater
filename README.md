@@ -10,11 +10,11 @@ Johan Haleby
 
 See http://code.haleby.se/2015/11/20/simple-templating-engine-in-bash/  and http://blog.lavoie.sl/2012/11/simple-templating-system-using-bash.html for more details
 
-## Instalation
+## Installation
 
 To install templater in linux type:
 
-    sudo curl -L https://raw.githubusercontent.com/johanhaley/bash-templater/master/templater.sh -o /usr/local/bin/templater
+    sudo curl -L https://raw.githubusercontent.com/johanhaleby/bash-templater/master/templater.sh -o /usr/local/bin/templater
     sudo chmod +x /usr/local/bin/templater
 
 ## Usage
