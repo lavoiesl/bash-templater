@@ -35,7 +35,7 @@ config_file="<none>"
 print_only="false"
 silent="false"
 
-usage="${PROGNAME} [-h] [-d] [-f] [-s] -- 
+usage="${PROGNAME} [-h] [-d] [-f] [-s] [-o] -- 
 
 where:
     -h, --help
@@ -46,6 +46,8 @@ where:
         Specify a file to read variables from
     -s, --silent
         Don't print warning messages (for example if no variables are found)
+    -o, --vars-optional
+        Allow for no variables to be present (simply returns the template as is)
 
 examples:
     VAR1=Something VAR2=1.2.3 ${PROGNAME} test.txt 
@@ -82,6 +84,9 @@ if [ "$#" -ne 0 ]; then
         -s|--silent)
             silent="true"
             ;;
+        -o|--vars-optional)
+            vars_optional="true"
+            ;;
         --)
             break
             ;;
@@ -99,8 +104,16 @@ fi
 vars=$(grep -oE '\{\{[A-Za-z0-9_]+\}\}' "${template}" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
 
 if [[ -z "$vars" ]]; then
-    if [ "$silent" == "false" ]; then
-        echo "Warning: No variable was found in ${template}, syntax is {{VAR}}" >&2
+    if [ "$vars_optional" == "true" ]; then
+        if [ "$print_only" == "false" ]; then
+            cat $template
+        fi
+        exit 0
+    else
+        if [ "$silent" == "false" ]; then
+            echo "Warning: No variable was found in ${template}, syntax is {{VAR}}" >&2
+        fi
+        exit 1
     fi
 fi
 
