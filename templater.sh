@@ -60,13 +60,6 @@ if [ $# -eq 0 ]; then
   exit 1    
 fi
 
-if [[ ! -f "${1}" ]]; then
-    echo "You need to specify a template file" >&2
-    echo "$usage"
-    exit 1
-fi
-
-template="${1}"
 
 if [ "$#" -ne 0 ]; then
     while [ "$#" -gt 0 ]
@@ -79,8 +72,8 @@ if [ "$#" -ne 0 ]; then
         -p|--print)
             print_only="true"
             ;;
-        -f|--file)
-            config_file="$2"
+        -f|--file) shift
+            config_file="$1"
             ;;
         -s|--silent)
             silent="true"
@@ -88,19 +81,26 @@ if [ "$#" -ne 0 ]; then
         -u|--nounset)
             nounset="true"
             ;;
-        --)
-            break
-            ;;
         -*)
             echo "Invalid option '$1'. Use --help to see the valid options" >&2
             exit 1
             ;;
-        # an option argument, continue
-        *)  ;;
+        # an option argument, this must be the template
+        *)  
+            template="$1"
+        ;;
         esac
         shift
     done
 fi
+
+if [[ ! -f "$template" ]]; then
+    echo "You need to specify a template file" >&2
+    echo "$usage"
+    exit 1
+fi
+
+
 
 vars=$(grep -oE '\{\{\s*[A-Za-z0-9_]+\s*\}\}' "$template" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
 
