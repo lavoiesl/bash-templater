@@ -35,6 +35,7 @@ config_file="<none>"
 print_only="false"
 silent="false"
 nounset="false"
+verbose="false"
 
 usage="${PROGNAME} [-h] [-d] [-f] [-s] -- 
 
@@ -49,6 +50,8 @@ where:
         Don't print warning messages (for example if no variables are found)
     -u, --nounset
         Unset variables throws error instead of a warning
+    -v, --verbose
+        Verbose output
 
 examples:
     VAR1=Something VAR2=1.2.3 ${PROGNAME} test.txt 
@@ -81,6 +84,9 @@ if [ "$#" -ne 0 ]; then
         -u|--nounset)
             nounset="true"
             ;;
+        -v|--verbose)
+            verbose="true"
+            ;;
         -*)
             echo "Invalid option '$1'. Use --help to see the valid options" >&2
             exit 1
@@ -105,7 +111,7 @@ fi
 vars=$(grep -oE '\{\{\s*[A-Za-z0-9_]+\s*\}\}' "$template" | sort | uniq | sed -e 's/^{{//' -e 's/}}$//')
 
 if [[ -z "$vars" ]]; then
-    if [ "$silent" == "false" ]; then
+    if [ "$verbose" == "true" ]; then
         echo "Warning: No variable was found in ${template}" >&2
     fi
     cat $template
