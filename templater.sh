@@ -189,13 +189,11 @@ fi
 for var in $vars; do
     value=$(var_value $var | sed -e "s;\&;\\\&;g" -e "s;\ ;\\\ ;g") # '&' and <space> is escaped 
     if [[ -z "$value" ]]; then
-        if [ $silent == "false" ]; then
-            if [[ $nounset == "false" ]]; then
-                echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
-            else
-                echo "ERROR: $var is not defined and no default is set." >&2
-                exit 1
-            fi
+        if [[ $nounset == "false" ]]; then
+            [ $silent == "true" ] || echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
+        else
+            echo "ERROR: $var is not defined and no default is set." >&2
+            exit 1
         fi
     fi
 
