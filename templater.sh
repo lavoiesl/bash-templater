@@ -34,6 +34,7 @@ readonly PROGNAME=$(basename $0)
 config_file="<none>"
 print_only="false"
 silent="false"
+nounset="false"
 
 usage="${PROGNAME} [-h] [-d] [-f] [-s] -- 
 
@@ -46,6 +47,8 @@ where:
         Specify a file to read variables from
     -s, --silent
         Don't print warning messages (for example if no variables are found)
+    -u, --nounset
+        Unset variables throws error instead of a warning
 
 examples:
     VAR1=Something VAR2=1.2.3 ${PROGNAME} test.txt 
@@ -81,6 +84,9 @@ if [ "$#" -ne 0 ]; then
             ;;
         -s|--silent)
             silent="true"
+            ;;
+        -u|--nounset)
+            nounset="true"
             ;;
         --)
             break
@@ -156,7 +162,12 @@ for var in $vars; do
     value=$(var_value $var | sed -e "s;\&;\\\&;g" -e "s;\ ;\\\ ;g") # '&' and <space> is escaped 
     if [[ -z "$value" ]]; then
         if [ $silent == "false" ]; then
-            echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
+            if [[ $nounset == "false" ]]; then
+                echo "Warning: $var is not defined and no default is set, replacing by empty" >&2
+            else
+                echo "ERROR: $var is not defined and no default is set." >&2
+                exit 1
+            fi
         fi
     fi
 
