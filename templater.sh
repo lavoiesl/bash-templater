@@ -106,8 +106,10 @@ vars=$(grep -oE '\{\{\s*[A-Za-z0-9_]+\s*\}\}' "$template" | sort | uniq | sed -e
 
 if [[ -z "$vars" ]]; then
     if [ "$silent" == "false" ]; then
-        echo "Warning: No variable was found in ${template}, syntax is {{VAR}}" >&2
+        echo "Warning: No variable was found in ${template}" >&2
     fi
+    cat $template
+    exit 0 
 fi
 
 # Load variables from file if needed
