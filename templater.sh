@@ -125,8 +125,10 @@ if [ "${config_file}" != "<none>" ]; then
       echo "$usage"      
       exit 1
     fi
-
+    _pwd=$PWD
+    cd "$(dirname "$config_file")"
     source "${config_file}"
+    cd "$_pwd"
 fi    
 
 var_value() {
